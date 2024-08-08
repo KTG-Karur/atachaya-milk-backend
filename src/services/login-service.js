@@ -5,33 +5,41 @@ const { customer } = require("../tables/table-name.js");
 const { generateQuery, getScriptsRunner, scriptsRunner, } = require("../models/query-generator.js");
 const messages = require("../models/message");
 const { getEmployee } = require("./employee-service.js");
+const { getRolePermission } = require("./role-permission-service.js");
+const { getUser } = require("./user-service.js");
 
 
 async function getLogin(postData) {
   try {
-   /*  const userCheckObj = {
+    const userCheckObj = {
       userName: postData.userName,
-      password : postData.password,
       isActive: true
     }
 
-    const getUserResult = await getEmployee(userCheckObj)
+    const getUserResult = await getUser(userCheckObj)
     if (getUserResult.length > 0) {
-      const userDetails = {
-        userId: getUserResult[0].employeeId,
-        employeeName: getUserResult[0].employeeName,
-        centerId: getUserResult[0].centerId
+      const roleIdReq = {
+        roleId: getUserResult[0].roleId
       }
-      return userDetails;
+      const rolePermission = await getRolePermission(roleIdReq)
+      const selectedIdPassword = getUserResult[0].password
+      const enteredPassword = postData.password
+      if (selectedIdPassword == enteredPassword) {
+        const userDetails = {
+          userId: getUserResult[0].userId,
+          userName: getUserResult[0].userName,
+          employeeId: getUserResult[0].employeeId,
+          employeeName: getUserResult[0].employeeName,
+          roleName: getUserResult[0].roleName,
+          pages: rolePermission[0].pages
+        }
+        return userDetails;
+      } else {
+        throw new Error(messages.INCORRECT_PASSWORD)
+      }
     } else {
       throw new Error(messages.INVALID_USER)
-    } */
-      const userDetails = {
-        userId: "1",
-        employeeName: "Madan",
-        centerId: 1
-      }
-      return userDetails;
+    }
   } catch (error) {
     throw error;
   }

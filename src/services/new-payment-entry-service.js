@@ -3,9 +3,9 @@
 const { paymentEntryTable } = require("../tables/index.js");
 const { paymentEntry } = require("../tables/table-name.js");
 const { generateQuery, getScriptsRunner, scriptsRunner, } = require("../models/query-generator.js");
-const messages = require("../models/message");
+const messages = require("../models/message.js");
 
-async function createPaymentEntry(postData) {
+async function createNewPaymentEntry(postData) {
   try {
     const query = generateQuery("INSERT", paymentEntry, paymentEntryTable, postData, `;`);
     const result = await scriptsRunner(query);
@@ -13,7 +13,7 @@ async function createPaymentEntry(postData) {
       const request = {
         paymentEntryId: result.insertId,
       };
-      return await getPaymentEntry(request);
+      return await getNewPaymentEntry(request);
     }
     throw new Error(messages.OPERATION_ERROR);
   } catch (error) {
@@ -21,7 +21,7 @@ async function createPaymentEntry(postData) {
   }
 }
 
-async function getPaymentEntry(query) {
+async function getNewPaymentEntry(query) {
   try {
     let iql = "";
     let count = 0;
@@ -43,14 +43,14 @@ async function getPaymentEntry(query) {
         iql += ` pe.${paymentEntryTable.isActive} = ${query.isActive}`;
       }
     }
-    let result = await getScriptsRunner("getPaymentEntry", iql);
+    let result = await getScriptsRunner("getNewPaymentEntry", iql);
     return result;
   } catch (error) {
     throw error;
   }
 }
 
-async function updatePaymentEntry(orgId, paymentEntryId, putData) {
+async function updateNewPaymentEntry(orgId, paymentEntryId, putData) {
   try {
     const query = generateQuery("UPDATE", paymentEntry, paymentEntryTable, putData, `WHERE ${paymentEntryTable.paymentEntryId} = ${paymentEntryId};`);
     const result = await scriptsRunner(query);
@@ -58,7 +58,7 @@ async function updatePaymentEntry(orgId, paymentEntryId, putData) {
       const request = {
         "paymentEntryId": paymentEntryId
       }
-      return await getPaymentEntry(request)
+      return await getNewPaymentEntry(request)
     }
     throw new Error(messages.OPERATION_ERROR)
   } catch (error) {
@@ -67,7 +67,7 @@ async function updatePaymentEntry(orgId, paymentEntryId, putData) {
 }
 
 module.exports = {
-  getPaymentEntry,
-  createPaymentEntry,
-  updatePaymentEntry
+  getNewPaymentEntry,
+  createNewPaymentEntry,
+  updateNewPaymentEntry
 };

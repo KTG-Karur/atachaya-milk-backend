@@ -1,25 +1,43 @@
 "use strict";
 
-const { purchaseTable, paymentHistoryTable } = require("../tables/index.js");
-const { purchase } = require("../tables/table-name.js");
+const { purchaseTable, paymentHistoryTable, paymentEntryTable } = require("../tables/index.js");
+const { purchase, paymentEntry, paymentHistory } = require("../tables/table-name.js");
 const { generateQuery, getScriptsRunner, scriptsRunner, } = require("../models/query-generator.js");
 const messages = require("../models/message");
 const { updatePaymentEntry, createPaymentEntry } = require("./payment-entry-service.js");
-const { createPaymentHistory } = require("./payment-history-service.js");
+const { createPaymentHistory, updatePaymentHistory, getPaymentHistory } = require("./payment-history-service.js");
+const { updateStockHub, createStockHub } = require("./stock-hub-service.js");
 
 async function createPurchase(postData) {
   try {
+    const paymentHistory = await createPaymentHistory(postData.paymentHistory)
+    postData.paymentHistoryId = paymentHistory[0].paymentHistoryId
     const query = generateQuery("INSERT", purchase, purchaseTable, postData, `;`);
     const result = await scriptsRunner(query);
+    
     const iql = `WHERE ${paymentHistoryTable.supplierId} = ${postData.supplierId}`
+    
     let checkEntry = await getScriptsRunner("getPaymentEntryCheck", iql);
+    
     if (checkEntry.length > 0) {
       const paymentEntry = await updatePaymentEntry(null, checkEntry[0].paymentEntryId, postData.paymentEntryDetails)
     } else {
       const paymentEntry = await createPaymentEntry(postData.paymentEntryDetails)
     }
-    const paymentHistory = await createPaymentHistory(postData.paymentHistory)
-
+    let iql2 = ""
+    let hubCheck = await getScriptsRunner("getHubCheck", iql2);
+    
+    const hubRequest={
+      totalQty : postData.qty
+    }
+    
+    if (hubCheck.length > 0) {
+      hubRequest.totalQty = parseInt(postData.qty) + parseInt(hubCheck[0].totalQty)
+      const hubStockRes = await updateStockHub(null, hubCheck[0].stockHubId, hubRequest)
+    } else {
+      const hubStockRes = await createStockHub(hubRequest)
+    }
+    
     if (result.serverStatus == 2) {
       const request = {
         purchaseId: result.insertId,
@@ -49,6 +67,7 @@ async function getPurchase(query) {
         iql += ` p.${purchaseTable.isActive} = ${query.isActive}`;
       }
     }
+    
     let result = await getScriptsRunner("getPurchase", iql);
     return result;
   } catch (error) {
@@ -87,14 +106,45 @@ async function getPurchaseDetails(query) {
 
 async function updatePurchase(orgId, purchaseId, putData) {
   try {
-    const query = generateQuery("UPDATE", purchase, purchaseTable, putData, `WHERE ${purchaseTable.purchaseId} = ${purchaseId};`);
-    const result = await scriptsRunner(query);
-    if (result.serverStatus == 2) {
-      const request = {
-        "purchaseId": purchaseId
+    if(putData.isDelete == 1){
+      const req={
+        paymentHistoryId : putData.paymentHistoryId
       }
-      return await getPurchase(request)
+      const historyData = await getPaymentHistory(req)
+      const updateRequest = {
+        advanceAmt : historyData[0]?.advanceAmount || ""
+      }
+      const paymentEntryQuery = generateQuery("UPDATE", paymentEntry, paymentEntryTable, updateRequest, `WHERE ${paymentEntryTable.supplierId} = ${putData.supplierId};`);
+      const resultEntry = await scriptsRunner(paymentEntryQuery);
+
+      const query = generateQuery("DELETE", purchase, null, null, `WHERE ${purchaseTable.purchaseId} = ${purchaseId};`);
+      const result = await scriptsRunner(query);
+
+      const historyQuery = generateQuery("DELETE", paymentHistory, null, null, `WHERE ${paymentHistoryTable.paymentHistoryId} = ${putData.paymentHistoryId};`);
+      const historyResult = await scriptsRunner(historyQuery);
+      return true;
+    }else{
+      const query = generateQuery("UPDATE", purchase, purchaseTable, putData, `WHERE ${purchaseTable.purchaseId} = ${purchaseId};`);
+      const result = await scriptsRunner(query);
+      const iql = `WHERE ${paymentHistoryTable.supplierId} = ${putData.supplierId}`
+      let checkEntry = await getScriptsRunner("getPaymentEntryCheck", iql);
+      if (checkEntry.length > 0) {
+        const paymentEntry = await updatePaymentEntry(null, checkEntry[0].paymentEntryId, putData.paymentEntryDetails)
+      } else {
+        const paymentEntry = await createPaymentEntry(putData.paymentEntryDetails)
+      }
+      
+      const paymentHistory = await updatePaymentHistory(null, putData.paymentHistory.paymentHistoryId ,putData.paymentHistory)
+      if (result.serverStatus == 2) {
+        const request = {
+          "purchaseId": purchaseId
+        }
+        return await getPurchase(request)
+      }
     }
+    
+
+    
     throw new Error(messages.OPERATION_ERROR)
   } catch (error) {
     throw error;

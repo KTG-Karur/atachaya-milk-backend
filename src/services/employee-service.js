@@ -5,6 +5,7 @@ const { employee } = require("../tables/table-name.js");
 const { generateQuery, getScriptsRunner, scriptsRunner, } = require("../models/query-generator.js");
 const messages = require("../models/message");
 const { generateSerialNumber } = require("../utils/appfunction.js");
+const { createUser } = require("./user-service.js");
 
 async function createEmployee(postData) {
   try {
@@ -16,6 +17,10 @@ async function createEmployee(postData) {
     const query = generateQuery("INSERT", employee, employeeTable, postData, `;`);
     const result = await scriptsRunner(query);
     if (result.serverStatus == 2) {
+      let data = postData.userDetails
+        const employeeId = result.insertId
+        data.employeeId =employeeId
+        const createUserData = await createUser(data)
       const request = {
         employeeId: result.insertId,
       };

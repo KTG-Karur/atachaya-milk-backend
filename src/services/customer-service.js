@@ -38,6 +38,11 @@ async function getCustomer(query) {
         count++;
         iql += ` c.${customerTable.customerId} = ${query.customerId}`;
       }
+      if (query.centerId) {
+        iql += count >= 1 ? ` AND` : ``;
+        count++;
+        iql += ` c.${customerTable.centerId} = ${query.centerId}`;
+      }
       if (query.isActive) {
         iql += count >= 1 ? ` AND` : ``;
         count++;
