@@ -29,6 +29,7 @@ module.exports = {
   customerAdvance: "customer_advance",
   customerAdvanceHistory: "customer_advance_history",
   customerSalary: "customer_salary",
+  feedEntryHistory: "feed_entry_history",
 
   rolePermission: "role_permission",
   pages: "pages",

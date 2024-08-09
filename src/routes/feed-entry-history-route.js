@@ -2,13 +2,13 @@
 
 const router = require("express").Router();
 const { ResponseEntry } = require("../helpers/construct-response");
-const entryDetailsServices = require("../services/entry-details-service");
+const feedEntryHistoryServices = require("../services/feed-entry-history");
 const messages = require("../models/message");
 
-async function createEntryDetails(req, res) {
+async function createFeedEntryHistory(req, res) {
   const responseEntries = new ResponseEntry();
   try {
-    responseEntries.data = await entryDetailsServices.createEntryDetails(req.body);
+    responseEntries.data = await feedEntryHistoryServices.createFeedEntryHistory(req.body);
     if (!responseEntries.data) responseEntries.message = messages.DATA_NOT_FOUND;
   } catch (error) {
     responseEntries.error = true;
@@ -19,10 +19,10 @@ async function createEntryDetails(req, res) {
   }
 }
 
-async function getEntryDetails(req, res) {
+async function getFeedEntryHistory(req, res) {
   const responseEntries = new ResponseEntry();
   try {
-    responseEntries.data = await entryDetailsServices.getEntryDetails(req.query);
+    responseEntries.data = await feedEntryHistoryServices.getFeedEntryHistory(req.query);
     if (!responseEntries.data)
       responseEntries.message = messages.DATA_NOT_FOUND;
   } catch (error) {
@@ -34,10 +34,10 @@ async function getEntryDetails(req, res) {
   }
 }
 
-async function updateEntryDetails(req, res) {
+async function updateFeedEntryHistory(req, res) {
   const responseEntries = new ResponseEntry();
   try {
-    responseEntries.data = await entryDetailsServices.updateEntryDetails(req.headers.orgid, req.params.entryDetailsId, req.body);
+    responseEntries.data = await feedEntryHistoryServices.updateFeedEntryHistory(req.headers.orgid, req.params.feedEntryHistoryId, req.body);
     if (!responseEntries.data) responseEntries.message = messages.DATA_NOT_FOUND;;
   } catch (error) {
     responseEntries.error = true;
@@ -48,8 +48,8 @@ async function updateEntryDetails(req, res) {
   }
 }
 
-router.get("/entry-details", getEntryDetails);
-router.post("/entry-details", createEntryDetails);
-router.put('/entry-details', updateEntryDetails);
+router.get("/feed-entry-history", getFeedEntryHistory);
+router.post("/feed-entry-history", createFeedEntryHistory);
+router.put('/feed-entry-history/:feedEntryHistoryId', updateFeedEntryHistory);
 
 module.exports = router;

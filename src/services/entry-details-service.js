@@ -64,7 +64,7 @@ async function getEntryDetails(query) {
             if (item.shiftId === 2) {
                 const updatedItem = {};
                 _.forOwn(item, (value, key) => {
-                    if (key == 'fat' || key == 'qty' || key == 'snf' || key == 'rate' || key == 'amount') {
+                    if (key == 'fat' || key == 'qty' || key == 'snf' || key == 'rate' || key == 'amount' || key == 'entryDetailsId' || key == 'shiftId') {
                         updatedItem[`E${key}`] = value;
                     } else {
                         updatedItem[key] = value;
@@ -99,14 +99,23 @@ async function getEntryDetails(query) {
 
 async function updateEntryDetails(orgId, entryDetailsId, putData) {
     try {
-        const query = generateQuery("UPDATE", entryDetails, entryDetailsTable, putData, `WHERE ${entryDetailsTable.entryDetailsId} = ${entryDetailsId};`);
-        const result = await scriptsRunner(query);
-        if (result.serverStatus == 2) {
+        if (putData.length > 0) {
+            console.log(JSON.stringify(putData))
+            for (let i = 0; i < putData.length; i++) {
+                let query = generateQuery("UPDATE", entryDetails, entryDetailsTable, putData[i], `WHERE ${entryDetailsTable.entryDetailsId} = ${putData[i].entryDetailsId};`);
+                console.log(query)
+                let result = await scriptsRunner(query);
+            }
+            return true;
+        }
+        /* const query = generateQuery("UPDATE", entryDetails, entryDetailsTable, putData, `WHERE ${entryDetailsTable.entryDetailsId} = ${entryDetailsId};`);
+        const result = await scriptsRunner(query); */
+        /* if (result.serverStatus == 2) {
             const request = {
                 "entryDetailsId": entryDetailsId
             }
             return await getEntryDetails(request)
-        }
+        } */
         throw new Error(messages.OPERATION_ERROR)
     } catch (error) {
         throw error;

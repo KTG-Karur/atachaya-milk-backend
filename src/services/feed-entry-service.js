@@ -4,18 +4,20 @@ const { feedEntryTable } = require("../tables/index.js");
 const { feedEntry } = require("../tables/table-name.js");
 const { generateQuery, getScriptsRunner, scriptsRunner, } = require("../models/query-generator.js");
 const messages = require("../models/message");
+const { createFeedEntryHistory, updateFeedEntryHistory } = require("./feed-entry-history.js");
 
 async function createFeedEntry(postData) {
   try {
-    const query = generateQuery("INSERT", feedEntry, feedEntryTable, postData, `;`);
-    const result = await scriptsRunner(query);
-    if (result.serverStatus == 2) {
-      const request = {
-        feedEntryId: result.insertId,
-      };
-      return await getFeedEntry(request);
+    const iql = ` WHERE ${feedEntryTable.customerId} = ${postData.customerId}`
+    const checkFeedEntry = await getScriptsRunner("getCheckFeedEntry", iql);
+    if(checkFeedEntry.length > 0){
+      postData.amount = parseInt(postData.amount) + parseInt(checkFeedEntry[0].amount)
+      const updateRes = await updateFeedEntry(null,checkFeedEntry[0].feedEntryId, postData)
+    }else{
+      const query = generateQuery("INSERT", feedEntry, feedEntryTable, postData, `;`);
+      const result = await scriptsRunner(query);
     }
-    throw new Error(messages.OPERATION_ERROR);
+    return await createFeedEntryHistory(postData.feedEntryHistory)
   } catch (error) {
     throw error;
   }
@@ -45,17 +47,18 @@ async function getFeedEntry(query) {
   }
 }
 
-async function updateFeedEntry(orgId, feedEntryId, putData) {
+async function updateFeedEntry(orgId, feedEntryHistoryId, putData) {
   try {
-    const query = generateQuery("UPDATE", feedEntry, feedEntryTable, putData, `WHERE ${feedEntryTable.feedEntryId} = ${feedEntryId};`);
-    const result = await scriptsRunner(query);
-    if (result.serverStatus == 2) {
-      const request = {
-        "feedEntryId": feedEntryId
-      }
-      return await getFeedEntry(request)
+    const iql = ` WHERE ${feedEntryTable.customerId} = ${putData.customerId}`
+    const checkFeedEntry = await getScriptsRunner("getCheckFeedEntry", iql);
+    if(checkFeedEntry.length > 0){
+      putData.amount = parseInt(putData.amount) + parseInt(checkFeedEntry[0].amount)
+      const query = generateQuery("UPDATE", feedEntry, feedEntryTable, putData, `WHERE ${feedEntryTable.feedEntryId} = ${checkFeedEntry[0].feedEntryId};`);
+    }else{
+      const query = generateQuery("INSERT", feedEntry, feedEntryTable, putData, `;`);
+      const result = await scriptsRunner(query);
     }
-    throw new Error(messages.OPERATION_ERROR)
+    return await updateFeedEntryHistory(null,feedEntryHistoryId ,putData.feedEntryHistory)
   } catch (error) {
     throw error;
   }

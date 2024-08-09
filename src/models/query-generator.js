@@ -42,6 +42,7 @@ function generateQuery(
       break;
 
     case "UPDATE":
+      
       let isUpdateArrayData = _.isArray(dataValueProperty);
       let reqUpdateData = isUpdateArrayData
         ? dataValueProperty[0]

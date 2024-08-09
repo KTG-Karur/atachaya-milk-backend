@@ -12,7 +12,7 @@ async function getPages(query) {
       if (query.parentId) {
         iql += count >= 1 ? ` AND` : ``;
         count++;
-        iql += ` p.${pagesTable.parentId} != ${null}`;
+        iql += ` p.${pagesTable.parentId} > ${0}`;
       }
       if (query.isActive) {
         iql += count >= 1 ? ` AND` : ``;
@@ -20,7 +20,9 @@ async function getPages(query) {
         iql += ` p.${pagesTable.isActive} = ${query.isActive}`;
       }
     }
+    console.log(iql)
     let result = await getScriptsRunner("getPages", iql);
+    console.log(result)
     result.map((ele)=>{
         ele.access = JSON.parse(ele.access)
     })

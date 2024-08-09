@@ -45,6 +45,9 @@ const scripts = {
     getRole: `getRole`,
     getRolePermission: `getRolePermission`,
     getPages: `getPages`,
+    getCheckCustomerAdvance: `getCheckCustomerAdvance`,
+    getFeedEntryHistory: `getFeedEntryHistory`,
+    getCheckFeedEntry: `getCheckFeedEntry`,
 
     getColor: `getColor`,
     getDashboard: `getDashboard`,

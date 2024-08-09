@@ -22,7 +22,6 @@ async function createTransportEntry(postData) {
 }
 
 async function getTransportEntry(query) {
-    console.log("in-->")
   try {
     let iql = "";
     let count = 0;
@@ -31,14 +30,15 @@ async function getTransportEntry(query) {
       if (query.transportEntryId) {
         iql += count >= 1 ? ` AND` : ``;
         count++;
-        iql += ` ${transportEntryTable.transportEntryId} = ${query.transportEntryId}`;
+        iql += ` te.${transportEntryTable.transportEntryId} = ${query.transportEntryId}`;
       }
       if (query.isActive) {
         iql += count >= 1 ? ` AND` : ``;
         count++;
-        iql += ` ${transportEntryTable.isActive} = ${query.isActive}`;
+        iql += ` te.${transportEntryTable.isActive} = ${query.isActive}`;
       }
     }
+    console.log(iql)
     let result = await getScriptsRunner("getTransportEntry", iql);
     return result;
   } catch (error) {

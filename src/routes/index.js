@@ -546,5 +546,6 @@ router.use(require('./user-route'));
 router.use(require('./pages-route'));
 router.use(require('./role-route'));
 router.use(require('./role-permission-route'));
+router.use(require('./feed-entry-history-route'));
  
 module.exports = router;

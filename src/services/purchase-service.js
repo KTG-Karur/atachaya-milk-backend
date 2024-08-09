@@ -22,7 +22,7 @@ async function createPurchase(postData) {
     if (checkEntry.length > 0) {
       const paymentEntry = await updatePaymentEntry(null, checkEntry[0].paymentEntryId, postData.paymentEntryDetails)
     } else {
-      const paymentEntry = await createPaymentEntry(postData.paymentEntryDetails)
+      const paymentEntry = await createPaymentEntry(postData.paymentEntryDetails,"purchaseEntry")
     }
     let iql2 = ""
     let hubCheck = await getScriptsRunner("getHubCheck", iql2);

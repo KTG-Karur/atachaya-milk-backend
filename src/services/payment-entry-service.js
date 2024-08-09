@@ -4,17 +4,29 @@ const { paymentEntryTable } = require("../tables/index.js");
 const { paymentEntry } = require("../tables/table-name.js");
 const { generateQuery, getScriptsRunner, scriptsRunner, } = require("../models/query-generator.js");
 const messages = require("../models/message");
+const { createPaymentHistory } = require("./payment-history-service.js");
 
-async function createPaymentEntry(postData) {
+async function createPaymentEntry(postData,name) {
   try {
-    const query = generateQuery("INSERT", paymentEntry, paymentEntryTable, postData, `;`);
-    const result = await scriptsRunner(query);
-    if (result.serverStatus == 2) {
-      const request = {
-        paymentEntryId: result.insertId,
-      };
-      return await getPaymentEntry(request);
+    if(name != null){
+      const query = generateQuery("INSERT", paymentEntry, paymentEntryTable, postData, `;`);
+      const result = await scriptsRunner(query);
+      if (result.serverStatus == 2) {
+        const request = {
+          paymentEntryId: result.insertId,
+        };
+        return await getPaymentEntry(request);
+      }
+  }else{
+    const paymentHistory = await createPaymentHistory(postData)
+    const iql = `WHERE ${paymentEntryTable.supplierId} = ${postData.supplierId}`
+    let checkEntry = await getScriptsRunner("getPaymentEntryCheck", iql);
+    if (checkEntry.length > 0) {
+      return await updatePaymentEntry(null, checkEntry[0].paymentEntryId, postData.paymentEntryDetails)
+    } else {
+      return await createPaymentEntry(postData.paymentEntryDetails,"purchaseEntry")
     }
+  }
     throw new Error(messages.OPERATION_ERROR);
   } catch (error) {
     throw error;

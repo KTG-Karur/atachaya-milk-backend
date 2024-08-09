@@ -185,12 +185,13 @@ module.exports = {
   bank_name "bankName", is_active "isActive", created_on "createdOn", updated_on "updatedOn"
   FROM transport_driver @param1`,
 
-  getTransportEntry: `SELECT transport_entry_id "transportEntryId", driver_id "driverId", km, amount, deduction,
-  deduction_reason "deductionReason", additional_amt "additionalAmt", additional_amt_reason "additionalAmtReason",
-  penalty, penalty_reason "penaltyReason", total_amt "totalAmt", shift_id "shiftId",
-  transport_issuse "transportIssuse", issuse_reason "issuseReason", alter_person_name "alterPersonName",
-  alter_contact_no "alterContactNo"
-  FROM transport_entry @param1`,
+  getTransportEntry: `SELECT te.transport_entry_id "transportEntryId", te.driver_id "driverId",COALESCE(td.driver_name, te.alter_person_name) "driverName", te.km, te.amount, te.deduction,
+  te.deduction_reason "deductionReason", te.additional_amt "additionalAmt", te.additional_amt_reason "additionalAmtReason",
+  te.penalty, te.penalty_reason "penaltyReason", te.total_amt "totalAmt", te.shift_id "shiftId",
+  te.transport_issuse "transportIssuse", te.issuse_reason "issuseReason", te.alter_person_name "alterPersonName",
+  te.alter_contact_no "alterContactNo"
+  FROM transport_entry te
+  left join transport_driver td on td.transport_driver_id = te.driver_id  @param1`,
 
   getTankerSupplier: `SELECT tanker_supplier_id "tankerSupplierId", company_name "companyName",
   contact_person_name "contactPersonName", contact_no "contactNo", registration_no "registrationNo",
@@ -206,8 +207,9 @@ module.exports = {
   left join tanker_supplier ts on ts.tanker_supplier_id = te.tanker_supplier_id @param1`,
 
   getCustomerAdvance: `SELECT cd.customer_advance_id "customerAdvanceId", cd.total_amount "totalAmount",
-  cd.paid_amount "paidAmount", cd.balance_amount "balanceAmount", 
-  cd.customer_id "customerId",c2.customer_name "customerName",
+  cd.paid_amount "paidAmount", cd.balance_amount "balanceAmount", cd.advance_amt "advanceAmt",
+  cd.customer_id "customerId",c2.customer_name "customerName",cd.last_payment_date "lastPaymentDate",
+  cd.last_update_reason "lastUpdateReason",
   cd.center_id "centerId",c.center_name "centerName",
   cd.is_active "isActive", cd.created_on "createdOn", cd.updated_on "updatedOn"
   FROM customer_advance cd
@@ -230,6 +232,20 @@ module.exports = {
   FROM customer_salary cs
   left join center cen on cen.center_id = cs.center_id 
   left join customer c on c.customer_id = cs.customer_id @param1`,
+
+  getCheckCustomerAdvance: `SELECT cd.customer_advance_id "customerAdvanceId",cd.advance_amt "advanceAmt" FROM customer_advance cd
+   @param1`,
+
+  getFeedEntryHistory: `SELECT feh.feed_entry_history_id "feedEntryHistoryId", feh.customer_id "customerId",c.customer_name "customerName",
+  feh.center_id "centerId", feh.payment_date "paymentDate", feh.quantity, feh.amount, feh.is_active "isActive",
+  feh.created_on "createdOn", feh.updated_on "updatedOn",fe.amount "paymentAmount",cen.center_name "centerName"
+  FROM feed_entry_history feh
+  left join customer c on c.customer_id = feh.customer_id 
+  left join feed_entry fe on fe.customer_id = feh.customer_id
+  left join center cen on cen.center_id = feh.center_id   @param1`,
+
+  getCheckFeedEntry: `SELECT fe.feed_entry_id "feedEntryId", fe.amount
+  FROM feed_entry fe @param1`,
 
   getColor: `SELECT color_id "colorId", color_name "colorName", is_active "isActive", created_on "createdOn"
   FROM color @param1`,
