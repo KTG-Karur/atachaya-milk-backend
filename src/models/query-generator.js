@@ -87,7 +87,7 @@ function generateQuery(
 }
 
 async function getScriptsRunner(scriptName, iql) {
-  const res = await global.datasources.milk_management.execute(executionTypes.sql.singleWithReplace, scripts[scriptName], [iql])
+  const res = await global.datasources.atachaya_admin.execute(executionTypes.sql.singleWithReplace, scripts[scriptName], [iql])
     .catch(function (err) {
       throw err;
     });
@@ -96,7 +96,7 @@ async function getScriptsRunner(scriptName, iql) {
 
 async function getScriptsIds(idName) {
   const scriptData = `SELECT LAST_INSERT_ID() AS ${idName};`;
-  const res = await global.datasources.milk_management.execute(executionTypes.sql.customQuery, scriptData, [iql])
+  const res = await global.datasources.atachaya_admin.execute(executionTypes.sql.customQuery, scriptData, [iql])
     .catch(function (err) {
       throw err;
     });
@@ -104,7 +104,7 @@ async function getScriptsIds(idName) {
 }
 
 async function scriptsRunner(query) {
-  const res = await global.datasources.milk_management.execute(executionTypes.sql.customQuery, query)
+  const res = await global.datasources.atachaya_admin.execute(executionTypes.sql.customQuery, query)
     .catch(function (err) {
       throw err;
     });
