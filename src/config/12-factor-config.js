@@ -29,7 +29,7 @@ const factorConfigObj = factorConfig({
         env: 'PORT',
         type: 'integer',
         required: true,
-        default: 5957,
+        default: 5014,
     },
     enableCORS: {
         env: 'ENABLE_CORS',
