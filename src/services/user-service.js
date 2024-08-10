@@ -8,7 +8,6 @@ const { encrptPassword, encryptObject, decrptPassword } = require("../utils/appf
 
 async function createUser(postData) {
   try {
-    console.log(postData)
     const password = postData.password
     const passcode = await encrptPassword(password)
     postData.password = passcode

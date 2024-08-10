@@ -11,6 +11,7 @@ const { getUser } = require("./user-service.js");
 
 async function getLogin(postData) {
   try {
+    console.log(postData)
     const userCheckObj = {
       userName: postData.userName,
       isActive: true

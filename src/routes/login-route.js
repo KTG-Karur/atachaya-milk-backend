@@ -8,8 +8,8 @@ const messages = require("../models/message");
 async function getLogin(req, res) {
   const responseEntries = new ResponseEntry();
   try {
-    // responseEntries.data = await loginServices.getLogin(req.query);
-    responseEntries.data = await loginServices.getLogin(req.body);
+    responseEntries.data = await loginServices.getLogin(req.query);
+    // responseEntries.data = await loginServices.getLogin(req.body);
     if (!responseEntries.data)
       responseEntries.message = messages.DATA_NOT_FOUND;
   } catch (error) {
