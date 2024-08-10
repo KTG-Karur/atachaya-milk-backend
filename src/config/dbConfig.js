@@ -12,5 +12,5 @@ module.exports.databaseConfig = [
     host: "192.46.225.22",
     port: "3306",
     password: 'x3ZS@A|Z}'    
-  }, 
+  },
 ];
