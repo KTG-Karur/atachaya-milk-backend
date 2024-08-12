@@ -9,7 +9,9 @@ const { encrptPassword, encryptObject, decrptPassword } = require("../utils/appf
 async function createUser(postData) {
   try {
     const password = postData.password
+    console.log("password----->"+password)
     const passcode = await encrptPassword(password)
+    console.log("passcode----->"+passcode)
     postData.password = passcode
     const query = generateQuery("INSERT", user, userTable, postData, `;`);
     const result = await scriptsRunner(query);

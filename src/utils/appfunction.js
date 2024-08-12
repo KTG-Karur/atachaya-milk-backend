@@ -1,6 +1,6 @@
 const NodeRSA = require('node-rsa');
 const CryptoJS = require("crypto-js");
-const secretKey = process.env.SECRET_KEY
+const secretKey = "passwordscretekey123"
 const moment = require('moment');
 const { getScriptsRunner } = require('../models/query-generator');
 
